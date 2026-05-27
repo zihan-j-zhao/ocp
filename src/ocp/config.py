@@ -30,11 +30,8 @@ class GpuCfg:
 @dataclass
 class ThresholdsCfg:
     util_low: int = 5
-    util_high: int = 30
     mem_low: int = 10
-    mem_high: int = 50
     idle_debounce_s: int = 30
-    busy_debounce_s: int = 5
 
 
 @dataclass
@@ -105,16 +102,12 @@ def _load_section(raw: dict, section: str, cls):
 
 def _validate(cfg: Config) -> None:
     t = cfg.thresholds
-    if not (0 <= t.util_low <= 100 and 0 <= t.util_high <= 100):
-        raise ConfigError("thresholds.util_{low,high} must be in [0, 100]")
-    if t.util_low >= t.util_high:
-        raise ConfigError("thresholds.util_low must be < util_high")
-    if not (0 <= t.mem_low <= 100 and 0 <= t.mem_high <= 100):
-        raise ConfigError("thresholds.mem_{low,high} must be in [0, 100]")
-    if t.mem_low >= t.mem_high:
-        raise ConfigError("thresholds.mem_low must be < mem_high")
-    if t.idle_debounce_s <= 0 or t.busy_debounce_s <= 0:
-        raise ConfigError("thresholds.*_debounce_s must be > 0")
+    if not 0 <= t.util_low <= 100:
+        raise ConfigError("thresholds.util_low must be in [0, 100]")
+    if not 0 <= t.mem_low <= 100:
+        raise ConfigError("thresholds.mem_low must be in [0, 100]")
+    if t.idle_debounce_s <= 0:
+        raise ConfigError("thresholds.idle_debounce_s must be > 0")
 
     w = cfg.worker
     bad = set(w.workloads) - _VALID_WORKLOADS

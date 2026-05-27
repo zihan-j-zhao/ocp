@@ -33,7 +33,7 @@ def test_unknown_key_in_section(tmp_path):
 
 
 def test_bad_thresholds(tmp_path):
-    p = _write(tmp_path, "[thresholds]\nutil_low = 50\nutil_high = 30\n")
+    p = _write(tmp_path, "[thresholds]\nutil_low = 150\n")
     with pytest.raises(config.ConfigError):
         config.load(p)
 

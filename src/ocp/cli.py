@@ -107,7 +107,7 @@ def daemon_on() -> None:
         if pid and _pid_alive(pid):
             typer.echo(f"ok: ocpd started (pid {pid})")
             return
-    _fail("ocpd may have failed to start; check journalctl or run `ocpd` in the foreground")
+    _fail("ocpd may have failed to start; check /var/log/ocp/ocpd.log or run `ocpd` in the foreground")
 
 
 @daemon_app.command("off")

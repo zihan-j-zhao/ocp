@@ -59,7 +59,7 @@ class WorkerManager:
         log.info("spawning worker gpu=%d: %s", gpu, " ".join(argv))
         proc = subprocess.Popen(
             argv,
-            stdout=sys.stderr,  # captured by the systemd journal
+            stdout=sys.stderr,
             stderr=sys.stderr,
             close_fds=True,
             start_new_session=True,

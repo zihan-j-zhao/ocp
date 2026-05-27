@@ -18,7 +18,6 @@ log = logging.getLogger(__name__)
 class DeviceState:
     gpu: int
     idle_streak_s: float = 0.0
-    busy_streak_s: float = 0.0
     last_sample: GpuSample | None = None
     last_decision: str = "init"
 
@@ -107,7 +106,6 @@ class Controller:
         cfg = self._cfg
         held = self._leases.covers(gpu)
         our_pid = self._workers.pid_for(gpu)
-        foreign = [p for p in sample.compute_pids if p != our_pid]
 
         if held:
             if our_pid is not None:
@@ -117,29 +115,9 @@ class Controller:
                 )
                 self._schedule_stop(gpu)
             st.idle_streak_s = 0.0
-            st.busy_streak_s = 0.0
             st.last_decision = "leased"
             return
 
-        if foreign:
-            st.busy_streak_s += dt
-            st.idle_streak_s = 0.0
-            if (
-                our_pid is not None
-                and st.busy_streak_s >= cfg.thresholds.busy_debounce_s
-            ):
-                self._schedule_stop(gpu)
-                self._history.record(
-                    uid=0, user="(auto)", cmd="worker_yielded",
-                    args={"gpu": gpu, "foreign_pids": foreign[:8]},
-                )
-                st.last_decision = "yielded"
-            else:
-                st.last_decision = "external"
-            return
-
-        # No foreign PIDs.
-        st.busy_streak_s = 0.0
         is_quiet = (
             sample.util_pct < cfg.thresholds.util_low
             and sample.mem_used_pct < cfg.thresholds.mem_low

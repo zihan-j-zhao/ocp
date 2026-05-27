@@ -1,0 +1,23 @@
+[gpu]
+indices = []                 # [] = all visible GPUs. Same-model only (no MIG).
+
+[thresholds]
+util_low      = 5            # %
+mem_low       = 10           # % of total
+idle_debounce_s = 30         # how long a GPU must look idle before we spawn
+
+[worker]
+workloads          = ["mem", "util"]   # subset of {"mem", "util"}; [] disables
+mem_frac           = 0.5               # mean fraction of VRAM to hold
+util_target        = 90                # 0–100, mean SM utilization
+mem_noise_period_s = 5                 # reallocate held VRAM every ~5s
+util_noise_period_s = 5                # reshape gemm operands every ~5s
+
+[multiuser]
+# Users allowed to run pause/resume. Match by name first, then numeric uid.
+# Root is always allowed implicitly.
+whitelist = []
+
+[pause]
+min_duration_s = 30          # shortest lease accepted
+max_duration_s = 7200        # hard ceiling (2h)

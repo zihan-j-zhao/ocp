@@ -70,11 +70,11 @@ def _ctrl(tmp_path, cfg, monitor, *, hist=None) -> tuple[Controller, FakeWorkerM
     return ctrl, wm, hist
 
 
-def _cfg(*, idle_debounce_s=4, busy_debounce_s=2) -> Config:
+def _cfg(*, idle_debounce_s=4) -> Config:
     cfg = Config()
     cfg.thresholds = ThresholdsCfg(
-        util_low=10, util_high=80, mem_low=20, mem_high=80,
-        idle_debounce_s=idle_debounce_s, busy_debounce_s=busy_debounce_s,
+        util_low=10, mem_low=20,
+        idle_debounce_s=idle_debounce_s,
     )
     cfg.worker = WorkerCfg()
     return cfg
@@ -121,26 +121,6 @@ async def test_no_spawn_when_busy(tmp_path):
         for _ in range(5):
             await _advance(ctrl, 2.0)
         assert wm.spawned == []
-    finally:
-        await hist.stop_writer()
-
-
-async def test_yield_on_foreign_pid(tmp_path):
-    idle = GpuSample(gpu=0, util_pct=0, mem_used_mb=100, mem_total_mb=80000)
-    busy = GpuSample(
-        gpu=0, util_pct=80, mem_used_mb=40000, mem_total_mb=80000,
-        compute_pids=(12345,),
-    )
-    # First idle so we spawn; then a foreign PID arrives.
-    mon = FakeMonitor({0: [idle, idle, idle, idle, busy, busy, busy]})
-    ctrl, wm, hist = _ctrl(tmp_path, _cfg(idle_debounce_s=2, busy_debounce_s=1), mon)
-    hist.start_writer()
-    try:
-        ctrl.set_watched([0])
-        for _ in range(8):
-            await _advance(ctrl, 1.0)
-        assert wm.spawned == [0]
-        assert 0 in wm.stopped
     finally:
         await hist.stop_writer()
 
