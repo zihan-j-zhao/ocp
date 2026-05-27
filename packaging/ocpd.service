@@ -1,0 +1,15 @@
+[Unit]
+Description=OCP — Occupy Compute Process daemon
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/ocpd
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=on-failure
+RestartSec=5
+# ocpd runs as root: it creates /run/ocp and /var/log/ocp on first start.
+User=root
+
+[Install]
+WantedBy=multi-user.target

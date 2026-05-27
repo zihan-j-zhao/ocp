@@ -1,0 +1,17 @@
+# Build artifacts
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+.mypy_cache/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Local scratch
+t
